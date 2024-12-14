@@ -186,13 +186,13 @@ def optimizar_plan(plan, descanso_por_zona, limite_tiempo, tiempo_por_serie=2):
         return plan
 
     # Contador global para desempate
-    tie_break_counter = 0
+    contador_desempate = 0
 
     # Crear un heap para reducir las series de los grupos según prioridad
     heap = []
     for g, s in patron_series.items():
         p = asignar_prioridad(g)
-        # Incluir tie_break_counter inicial como 0
+        # Incluir contador_desempate inicial como 0
         heapq.heappush(heap, (p, 0, g, s))
 
     # Reducir series mientras se exceda el tiempo
@@ -207,12 +207,12 @@ def optimizar_plan(plan, descanso_por_zona, limite_tiempo, tiempo_por_serie=2):
             s -= 1
             patron_series[g] = s
             if s > 1:
-                tie_break_counter += 1
+                contador_desempate += 1
                 """
-                Incrementamos tie_break_counter para que la siguiente inserción
+                Incrementamos contador_desempate para que la siguiente inserción
                 de este grupo tenga un tie_count mayor, rotando el orden.
                 """
-                heapq.heappush(heap, (p, tie_break_counter, g, s))
+                heapq.heappush(heap, (p, contador_desempate, g, s))
         else:
             # Si ya está en 1, no lo volvemos a insertar, no se puede reducir más.
             patron_series[g] = s
