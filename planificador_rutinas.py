@@ -147,8 +147,8 @@ def optimizar_plan(plan, descanso_por_zona, limite_tiempo, tiempo_por_serie=2):
         return plan
 
     # Definir prioridades
-    prioridad_baja = {"abdominales", "brazos"}  # prioridad 1
-    prioridad_alta = {"piernas", "pecho", "espalda"}    # prioridad 2
+    prioridad_baja = {"abdominales", "brazos"}  # Prioridad 1
+    prioridad_alta = {"piernas", "pecho", "espalda"}    # Prioridad 2    
 
     def asignar_prioridad(grupo):
         """
@@ -185,11 +185,15 @@ def optimizar_plan(plan, descanso_por_zona, limite_tiempo, tiempo_por_serie=2):
     if not tiempo_excede(patron_series):
         return plan
 
+    # Contador global para desempate
+    tie_break_counter = 0
+
     # Crear un heap para reducir las series de los grupos según prioridad
     heap = []
     for g, s in patron_series.items():
         p = asignar_prioridad(g)
-        heapq.heappush(heap, (p, g, s))
+        # Incluir tie_break_counter inicial como 0
+        heapq.heappush(heap, (p, 0, g, s))
 
     # Reducir series mientras se exceda el tiempo
     while tiempo_excede(patron_series):
@@ -197,14 +201,18 @@ def optimizar_plan(plan, descanso_por_zona, limite_tiempo, tiempo_por_serie=2):
             # No se pueden reducir más series, no es posible cumplir el límite
             print("No es posible ajustar el plan al límite de tiempo dado.")
             break
-        p, g, s = heapq.heappop(heap)
+        p, tie_count, g, s = heapq.heappop(heap)
         if s > 1:
             # Reducimos en una serie
             s -= 1
             patron_series[g] = s
             if s > 1:
-                # Si aún se puede reducir más adelante, lo reinsertamos al heap
-                heapq.heappush(heap, (p, g, s))
+                tie_break_counter += 1
+                """
+                Incrementamos tie_break_counter para que la siguiente inserción
+                de este grupo tenga un tie_count mayor, rotando el orden.
+                """
+                heapq.heappush(heap, (p, tie_break_counter, g, s))
         else:
             # Si ya está en 1, no lo volvemos a insertar, no se puede reducir más.
             patron_series[g] = s

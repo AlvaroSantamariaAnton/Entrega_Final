@@ -1,34 +1,35 @@
 # Generador de Planes de Entrenamiento
 
-Este programa genera un plan de entrenamiento personalizado basado en el material disponible, el nivel de experiencia y el número de días de entrenamiento que el usuario desea. Además, permite establecer un límite de tiempo (en minutos) para el entrenamiento diario y ajusta el número de series por grupo muscular para cumplir con ese límite.
+Este programa genera un plan de entrenamiento personalizado según el material disponible, el nivel de experiencia y el número de días de entrenamiento. Además, permite establecer un límite de tiempo diario y ajusta el número de series por grupo muscular para cumplir con dicho límite.
 
 ## Características
 
-- **Selección de material:** El usuario puede elegir entre entrenamiento de `cuerpo libre`, con `bandas` o con `pesas`.
+- **Selección de material:** El usuario puede elegir entre `cuerpo libre`, `bandas` o `pesas`.
 - **Nivel de experiencia:**  
   - Principiante (máximo 3 días/semana)  
   - Intermedio (máximo 5 días/semana)  
   - Avanzado (máximo 6 días/semana)
-- **Días de entrenamiento:** El usuario indica cuántos días a la semana desea entrenar, respetando las restricciones según el nivel.
+- **Días de entrenamiento:** El usuario indica cuántos días desea entrenar por semana, respetando el máximo según su nivel.
 - **Generación del plan:**  
-  - Se asignan ejercicios a cada grupo muscular (piernas, pecho, espalda, brazos y abdominales) según el material elegido.
+  - Se asigna un ejercicio por grupo muscular (piernas, pecho, espalda, brazos, abdominales) para cada día.
   - Se calculan las series totales según el nivel y los días, distribuyéndolas equitativamente entre los grupos.
-- **Cálculo de tiempo:**  
-  - Cada serie toma un tiempo fijo (2 minutos).
-  - Cada grupo muscular añade descanso proporcional a la cantidad de series asignadas (descanso_por_grupo * número_de_series).
+- **Cálculo del tiempo:**  
+  - Cada serie tarda 2 minutos.
+  - El descanso se calcula multiplicando el descanso base por el número de series de cada grupo.
 - **Límite de tiempo:**  
-  - El usuario puede elegir un límite (30, 60, 90, 120 minutos o sin límite).
-  - Si el tiempo del día más largo excede el límite, el programa reduce las series prioritizando mantener más series en grupos musculares de mayor importancia (piernas, pecho, espalda) y reduciendo primero abdominales y brazos.
-  - Finalmente, se asegura que todos los días tengan la misma distribución de series por grupo, logrando uniformidad.
+  - Opciones: 30, 60, 90, 120 minutos o sin límite.
+  - Si el tiempo total excede el límite, se reducen las series, primero de los grupos de menor prioridad (abdominales, brazos) y luego de los de mayor prioridad (piernas, pecho, espalda).
+  - Para evitar que siempre se reduzcan las series del mismo grupo de igual prioridad, se utiliza un contador de desempate, asegurando un reparto más equitativo de las reducciones.
+  - Finalmente, se garantiza que todos los días tengan la misma distribución de series por grupo, logrando uniformidad.
 
 ## Lógica de Prioridad
 
-La optimización se realiza en base a prioridades:
+La optimización de las series se basa en una cola de prioridad (heap):
 
-- **Baja prioridad (se reduce primero):** Abdominales, Brazos.
-- **Alta prioridad (se reduce al final):** Piernas, Pecho, Espalda.
+- **Baja prioridad:** Abdominales, Brazos (se reducen primero).
+- **Alta prioridad:** Piernas, Pecho, Espalda (se mantienen mejor).
 
-Se utiliza una cola de prioridad (heap) para ir reduciendo series de los grupos menos prioritarios antes de ajustar los más prioritarios.
+La cola de prioridad asegura que primero se reduzcan las series de grupos con menor prioridad. Además, se emplea un contador de desempate para repartir las reducciones equitativamente entre grupos con la misma prioridad, evitando que uno solo se vea afectado repetidamente.
 
 ## Ejecución
 
